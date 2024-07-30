@@ -35,11 +35,11 @@ func main() {
 	path := strings.Split(string(buf), " ")[1]
 	if strings.Contains(path, "/echo") {
 		body := strings.Split(path, "/echo")[2]
-		conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len([]byte(body))) + "\r\n\r\n" + strings.Split(path, "/")[2]))
+		conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len([]byte(body))) + "\r\n\r\n" + body))
 	} else if strings.HasPrefix(string(buf), "GET / HTTP/1.1") {
-		conn.Write([]byte("HTTP/1.1 200 OK\r\n"))
+		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 	} else {
-		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n"))
+		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
 	conn.Close()
 }
