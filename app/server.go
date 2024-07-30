@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	// Uncomment this block to pass the first stage
@@ -30,11 +31,11 @@ func main() {
 
 	buf := make([]byte, 1024)
 	conn.Read(buf)
-
-	if !strings.HasPrefix(string(buf), "GET / HTTP/1.1") {
-		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+	fmt.Println("Request received: ")
+	path := strings.Split(string(buf), " ")[1]
+	if strings.Contains(path, "/echo") {
+		body := strings.Split(path, "/")[2]
+		conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len([]byte(body))) + "\r\n\r\n" + strings.Split(path, "/")[2]))
 		conn.Close()
-		return
 	}
-	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 }
