@@ -38,7 +38,8 @@ func main() {
 	}
 
 	path := request.URL.Path
-	if path == "/echo" {
+	fmt.Println("Path: ", path)
+	if strings.Contains(path, "/echo") {
 		body := strings.Split(path, "/")[2]
 		conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len([]byte(body))) + "\r\n\r\n" + body))
 	} else if path == "/" {
