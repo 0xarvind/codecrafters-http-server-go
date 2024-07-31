@@ -36,7 +36,7 @@ func serve(conn net.Conn, wordPtr *string) {
 	encoders := strings.Split(request.Header.Get("Accept-Encoding"), ", ")
 
 	if strings.Contains(path, "/echo") {
-		if len(encoders) > 1 {
+		if len(encoders) >= 1 {
 			if !contains(encoders, "gzip") {
 				conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n"))
 			} else {
