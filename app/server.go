@@ -2,8 +2,11 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"compress/gzip"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -36,16 +39,23 @@ func serve(conn net.Conn, wordPtr *string) {
 	encoders := strings.Split(request.Header.Get("Accept-Encoding"), ", ")
 
 	if strings.Contains(path, "/echo") {
+		body := strings.Split(path, "/")[2]
 		if request.Header.Get("Accept-Encoding") != "" {
 			if !contains(encoders, "gzip") {
 				conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n"))
 			} else {
-				conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\n\r\n"))
+				var b bytes.Buffer
+				gz := gzip.NewWriter(&b)
+				_, err := gz.Write([]byte(body))
+				gz.Close()
+				if err != nil {
+					log.Fatal(err)
+				}
+				conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(b.String())) + "\r\n\r\n" + b.String()))
 				conn.Close()
 				return
 			}
 		} else {
-			body := strings.Split(path, "/")[2]
 			conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len([]byte(body))) + "\r\n\r\n" + body))
 		}
 	} else if strings.Contains(path, "/files") {
