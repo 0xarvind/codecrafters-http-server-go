@@ -24,6 +24,15 @@ func serve(conn net.Conn) {
 	if strings.Contains(path, "/echo") {
 		body := strings.Split(path, "/")[2]
 		conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len([]byte(body))) + "\r\n\r\n" + body))
+	} else if strings.Contains(path, "/files") {
+		fileName := strings.Split(path, "/")[2]
+		dat, err := os.ReadFile("/tmp/" + fileName)
+		if err != nil {
+			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+			return
+		}
+		fmt.Print(string(dat))
+		conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length:" + strconv.Itoa(len([]byte(dat))) + "\r\n\r\n" + string(dat)))
 	} else if path == "/" {
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 	} else if path == "/user-agent" {
