@@ -27,12 +27,14 @@ func serve(conn net.Conn, wordPtr *string) {
 	fmt.Println("Header: ", path, request.Header.Values("Accept-Encoding"))
 	fmt.Println("Path: ", path)
 	if strings.Contains(path, "/echo") {
-		if request.Header.Values("Accept-Encoding")[0] != "gzip" {
-			conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n"))
-		} else if request.Header.Values("Accept-Encoding")[0] == "gzip" {
-			conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\n\r\n"))
-			conn.Close()
-			return
+		if len(request.Header.Values("Accept-Encoding")) > 0 {
+			if request.Header.Values("Accept-Encoding")[0] != "gzip" {
+				conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n"))
+			} else if request.Header.Values("Accept-Encoding")[0] == "gzip" {
+				conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\n\r\n"))
+				conn.Close()
+				return
+			}
 		} else {
 			body := strings.Split(path, "/")[2]
 			conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len([]byte(body))) + "\r\n\r\n" + body))
