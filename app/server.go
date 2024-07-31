@@ -13,6 +13,15 @@ import (
 	"os"
 )
 
+func contains(values []string, text string) bool {
+	for _, value := range values {
+		if value == text {
+			return true
+		}
+	}
+	return false
+}
+
 func serve(conn net.Conn, wordPtr *string) {
 	request, err := http.ReadRequest(bufio.NewReader(conn))
 
@@ -24,13 +33,13 @@ func serve(conn net.Conn, wordPtr *string) {
 	}
 
 	path := request.URL.Path
-	fmt.Println("Header: ", path, request.Header.Values("Accept-Encoding"))
-	fmt.Println("Path: ", path)
+	encoders := strings.Split(request.Header.Get("Accept-Encoding"), ", ")
+
 	if strings.Contains(path, "/echo") {
-		if len(request.Header.Values("Accept-Encoding")) > 0 {
-			if request.Header.Values("Accept-Encoding")[0] != "gzip" {
+		if len(encoders) > 0 {
+			if !contains(encoders, "gzip") {
 				conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n"))
-			} else if request.Header.Values("Accept-Encoding")[0] == "gzip" {
+			} else {
 				conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\n\r\n"))
 				conn.Close()
 				return
