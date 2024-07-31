@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -12,7 +13,7 @@ import (
 	"os"
 )
 
-func serve(conn net.Conn) {
+func serve(conn net.Conn, wordPtr *string) {
 	request, err := http.ReadRequest(bufio.NewReader(conn))
 	if err != nil {
 		fmt.Println("Error reading request. ", err.Error())
@@ -26,7 +27,7 @@ func serve(conn net.Conn) {
 		conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len([]byte(body))) + "\r\n\r\n" + body))
 	} else if strings.Contains(path, "/files") {
 		fileName := strings.Split(path, "/")[2]
-		dat, err := os.ReadFile("/tmp/" + fileName)
+		dat, err := os.ReadFile(*wordPtr + fileName)
 		if err != nil {
 			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 			return
@@ -47,6 +48,8 @@ func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 
+	wordPtr := flag.String("directory", "/tmp", "Directory to serve files from")
+	flag.Parse()
 	// Uncomment this block to pass the first stage
 	//
 	l, err := net.Listen("tcp", "0.0.0.0:4221")
@@ -63,6 +66,6 @@ func main() {
 			os.Exit(1)
 		}
 
-		go serve(conn)
+		go serve(conn, wordPtr)
 	}
 }
