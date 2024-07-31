@@ -15,6 +15,9 @@ import (
 
 func serve(conn net.Conn, wordPtr *string) {
 	request, err := http.ReadRequest(bufio.NewReader(conn))
+
+	buf := make([]byte, 1024)
+
 	if err != nil {
 		fmt.Println("Error reading request. ", err.Error())
 		return
@@ -29,7 +32,10 @@ func serve(conn net.Conn, wordPtr *string) {
 		fileName := strings.Split(path, "/")[2]
 		dat, err := os.ReadFile(*wordPtr + fileName)
 		if err != nil {
-			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+			request.Body.Read(buf)
+			os.WriteFile(*wordPtr+fileName, buf, 0644)
+			conn.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
+			conn.Close()
 			return
 		}
 		fmt.Print(string(dat))
