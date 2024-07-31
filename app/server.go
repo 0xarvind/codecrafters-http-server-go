@@ -32,8 +32,8 @@ func serve(conn net.Conn, wordPtr *string) {
 		fileName := strings.Split(path, "/")[2]
 		dat, err := os.ReadFile(*wordPtr + fileName)
 		if err != nil {
-			request.Body.Read(buf)
-			os.WriteFile(*wordPtr+fileName, buf, 0644)
+			n, _ := request.Body.Read(buf)
+			os.WriteFile(*wordPtr+fileName, buf[:n], 0644)
 			conn.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
 			conn.Close()
 			return
